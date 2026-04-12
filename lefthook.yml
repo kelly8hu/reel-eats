@@ -1,0 +1,10 @@
+# lefthook.yml — pre-commit hooks (managed by nexus)
+# Install: brew install lefthook && lefthook install
+
+pre-commit:
+  parallel: true
+  commands:
+    env-sync:
+      run: bash ~/.nexus/scripts/check-env-sync.sh
+    claude-md-sync:
+      run: bash ~/.nexus/scripts/sync-claude-md.sh

@@ -1,0 +1,34 @@
+# OS
+.DS_Store
+
+# Nexus
+.nexus/
+.nexus-version
+
+# Secrets
+.env
+.env.local
+.env.*.local
+
+# Build output
+dist/
+build/
+coverage/
+
+# Node (ignored harmlessly in non-Node projects)
+node_modules/
+.next/
+.turbo/
+*.tsbuildinfo
+.vercel/
+
+# Python
+__pycache__/
+.venv/
+*.egg-info/
+
+# Go
+vendor/
+
+# Rust
+target/
