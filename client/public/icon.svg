@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="80" fill="#E63946"/>
+  <!-- Play button circle (video) -->
+  <circle cx="256" cy="210" r="110" fill="none" stroke="white" stroke-width="22"/>
+  <polygon points="224,160 224,260 318,210" fill="white"/>
+  <!-- Recipe lines -->
+  <rect x="126" y="348" width="260" height="22" rx="11" fill="white"/>
+  <rect x="156" y="390" width="200" height="22" rx="11" fill="white"/>
+</svg>

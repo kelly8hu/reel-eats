@@ -1,8 +1,6 @@
 [tools]
-# Pin your runtimes here. Examples:
-# node = "24"
-# python = "3.12"
-# go = "1.23"
+node = "24"
+python = "3.12"
 
 [settings]
 auto_install = true

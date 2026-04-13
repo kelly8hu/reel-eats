@@ -1,0 +1,9 @@
+{
+  "name": "reel-eats",
+  "private": true,
+  "workspaces": [
+    "shared",
+    "server",
+    "client"
+  ]
+}

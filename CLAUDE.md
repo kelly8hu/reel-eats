@@ -1,16 +1,76 @@
 # CLAUDE.md
 
 ## Project Overview
-<!-- Auto-populated as the project grows -->
+Reel Eats — a full-stack web app that saves Instagram Reel URLs, extracts recipe data
+using Apify + Whisper + Claude API, and presents step-by-step cooking instructions
+with health-aware recommendations and pantry filtering.
+
+**Platform strategy**: PWA-first. The app is installable on iOS and Android via the browser
+(Add to Home Screen) and registers as a native share-sheet target once installed.
+A React Native app is a possible future phase, but the PWA covers the core UX for the
+initial product.
+
+### Deployment architecture
+```
+Browser / Phone
+      │
+      ├── client (React + Vite PWA)  ──→  Vercel (static hosting + CDN)
+      │         └── /share route         SPA rewrites via vercel.json
+      │
+      └── server (Express + Node.js) ──→  Railway (always-on Node process)
+                └── fire-and-forget         required: processJob() must not be
+                    processJob()            killed mid-flight (rules out serverless)
+```
+
+Env vars:
+- Vercel: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`
+- Railway: all server-side vars (`SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `ANTHROPIC_API_KEY`,
+  `APIFY_API_KEY`, `REPLICATE_API_TOKEN`, `SESSION_SECRET`, `CORS_ORIGIN`)
+
+### Scrape pipeline
+```
+User pastes Instagram URL
+        ↓
+Backend calls Apify API  ──→  returns: video_url, thumbnail, caption, transcript
+        ↓
+Download video server-side (temp file)
+        ↓
+Run Whisper on audio  ──→  full spoken transcript
+        ↓
+Claude receives: caption + Apify transcript + Whisper transcript
+        ↓
+Returns structured recipe JSON  ──→  save to Supabase
+```
 
 ## Tech Stack
-<!-- Detected from project manifests and configs -->
+- **Frontend**: React + Vite (TypeScript) — `/client`
+- **Backend**: Node.js + Express (TypeScript) — `/server`
+- **Database / Auth / Storage**: Supabase (Postgres + RLS + Storage)
+- **Transcription**: Replicate API (Whisper) — env: `REPLICATE_API_TOKEN`
+- **AI parsing**: Anthropic Claude API (`claude-haiku-4-5`) — recipe extraction + health recs
+- **Instagram scraping**: Apify API — returns video URL, thumbnail, caption, transcript
+- **Validation**: `zod` for all inputs (client and server, schemas in `/shared`)
+- **Rate limiting**: `express-rate-limit` on all API routes
+- **Test runner**: Vitest + supertest
 
 ## Architecture Rules
 
 ### Dependency Direction
-<!-- Define your layer chain when ready. Example: -->
-<!-- Types → Config → Repo → Service → Runtime → UI -->
+Shared types → Server services → Server routes → Client lib → Client hooks → Client pages/components
+
+No imports from `/client` into `/server` or vice-versa.
+`/shared` may be imported by both sides.
+`/server/lib/supabaseAdmin.ts` (service role) must never be imported outside `/server`.
+
+### Key invariants
+- All API routes except `/auth/*` must use the `requireAuth` middleware.
+- User identity always comes from the validated JWT — never from the request body.
+- Every Supabase table has RLS enabled. No `select('*')` in production routes.
+- Instagram URLs validated against `^https://(www\.)?instagram\.com/reel/[A-Za-z0-9_-]+` before passing to Apify.
+- Apify calls go through `/server/services/scraper.ts` — never called directly from routes.
+- Downloaded video files are written to a temp directory and deleted immediately after Whisper finishes.
+- All Claude API calls go through `/server/services/ai.ts` — never called directly from routes.
+- Scrape endpoint is async: return a job ID immediately, poll for results.
 
 <!-- nexus:context -->
 ## Project Context
@@ -24,20 +84,30 @@ Updated at the start of each session and after each doctor run.
 ```
 .
 ./.claude
-./.claude/settings.json
-./.env.example
 ./.git
 ./.github
-./.github/pull_request_template.md
-./.gitignore
-./.mise.toml
 ./.nexus
-./.nexus-version
-./.nexus/.last-sync
-./.nexus/context.md
-./CLAUDE.md
-./justfile
-./lefthook.yml
+./client
+./client/.nexus
+./client/public
+./client/src
+./client/src/hooks
+./client/src/lib
+./client/src/pages
+./node_modules
+./server
+./server/.nexus
+./server/node_modules
+./server/src
+./server/src/lib
+./server/src/middleware
+./server/src/routes
+./server/src/services
+./shared
+./shared/src
+./supabase
+./supabase/.temp
+./supabase/migrations
 ```
 <!-- nexus:end -->
 
@@ -60,6 +130,43 @@ Updated at the start of each session and after each doctor run.
 - Commit messages: `type(scope): description`
 - Never commit `.env` files or secrets.
 <!-- nexus:end -->
+
+## Security — critical rules
+- `SUPABASE_SERVICE_KEY`, `ANTHROPIC_API_KEY`, and `APIFY_API_KEY` must never appear in any client-side bundle.
+- Never pass unsanitized user input to shell commands (use `spawn` with args array, not `exec`).
+- Never concatenate user input into SQL — use Supabase's parameterized query builder only.
+- Use helmet middleware on every response. Do not disable any helmet defaults.
+- All cookies: `httpOnly: true`, `secure: true`, `sameSite: 'strict'`.
+- Rate limits: `POST /api/recipes` → 10/user/hour; `POST /api/auth/*` → 5/IP/15 min; all others → 100/IP/15 min.
+- Never expose stack traces to clients. Detailed errors go to server logs only (use pino, not console.log).
+- Thumbnails/uploads go to Supabase Storage only — never the local filesystem.
+
+## Workflow rules
+1. **Explore before coding**: Read relevant files before making changes.
+2. **Plan before implementing**: For tasks touching more than one file, confirm a plan first.
+3. **Verify your work**: Run lint + typecheck after every set of changes.
+4. **Never suppress errors**: Fix root causes. Do not use try/catch to hide failures silently.
+
+## Supabase
+- Migrations live in `supabase/migrations/`. Run them with `supabase db push` (remote) or
+  `supabase start && supabase db reset` (local dev).
+- Local dev: `supabase start` spins up Postgres + Studio + Auth on localhost. Copy the
+  printed anon key and URL into `.env` / `.env.local`.
+- RLS is enabled on every table. The server uses the service-role key (bypasses RLS).
+  The browser client uses the anon key (RLS enforced).
+
+## Deployment
+### Client → Vercel
+1. Connect the repo in the Vercel dashboard, set root directory to `client`.
+2. Build command: `npm run build` / output dir: `dist`.
+3. Add env vars: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`.
+4. SPA routing is handled by `client/vercel.json` (all routes → index.html).
+
+### Server → Railway
+1. Connect the repo, set root directory to `server`.
+2. Railway auto-detects Nixpacks; `railway.toml` configures the start command and health check.
+3. Add all server-side env vars (see `.env.example`).
+4. Set `CORS_ORIGIN` to the Vercel production URL (e.g. `https://reeleats.vercel.app`).
 
 ## When In Doubt
 - Check existing code for patterns before inventing new ones.
