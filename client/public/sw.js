@@ -17,8 +17,9 @@ self.addEventListener('install', () => {
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url)
 
-  // Never intercept API calls — always go to the network
+  // Never intercept API calls or Supabase requests — always go to the network
   if (url.pathname.startsWith('/api/')) return
+  if (url.hostname.endsWith('.supabase.co')) return
 
   // Network-first for navigation requests so fresh HTML is always served
   if (event.request.mode === 'navigate') {
