@@ -1,15 +1,17 @@
-const CACHE = 'reel-eats-v1'
+const CACHE = 'reel-eats-v2'
 
-// Cache the app shell on install so the share target opens instantly
-self.addEventListener('install', (event) => {
+// On activate, delete all old caches
+self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.open(CACHE).then((cache) => cache.addAll(['/']))
+    caches.keys().then((keys) =>
+      Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))
+    )
   )
-  self.skipWaiting()
+  self.clients.claim()
 })
 
-self.addEventListener('activate', () => {
-  self.clients.claim()
+self.addEventListener('install', () => {
+  self.skipWaiting()
 })
 
 self.addEventListener('fetch', (event) => {
@@ -18,7 +20,13 @@ self.addEventListener('fetch', (event) => {
   // Never intercept API calls — always go to the network
   if (url.pathname.startsWith('/api/')) return
 
-  // Cache-first for app shell assets; fall back to network
+  // Network-first for navigation requests so fresh HTML is always served
+  if (event.request.mode === 'navigate') {
+    event.respondWith(fetch(event.request))
+    return
+  }
+
+  // Cache-first for static assets
   event.respondWith(
     caches.match(event.request).then(
       (cached) => cached ?? fetch(event.request)
