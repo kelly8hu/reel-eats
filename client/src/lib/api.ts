@@ -1,5 +1,7 @@
 import { supabase } from './supabase.js'
 
+const API_BASE = import.meta.env.VITE_API_URL ?? ''
+
 async function authHeaders(): Promise<Record<string, string>> {
   const { data } = await supabase.auth.getSession()
   const token = data.session?.access_token
@@ -13,7 +15,7 @@ export type ApiResponse<T> = { data: T; error?: never } | { data?: never; error:
 
 export async function submitRecipe(url: string): Promise<ApiResponse<{ jobId: string }>> {
   const headers = await authHeaders()
-  const res = await fetch('/api/recipes', {
+  const res = await fetch(`${API_BASE}/api/recipes`, {
     method: 'POST',
     headers,
     body: JSON.stringify({ url }),
@@ -32,6 +34,6 @@ export interface JobResult {
 
 export async function getJobStatus(jobId: string): Promise<ApiResponse<JobResult>> {
   const headers = await authHeaders()
-  const res = await fetch(`/api/recipes/jobs/${jobId}`, { headers })
+  const res = await fetch(`${API_BASE}/api/recipes/jobs/${jobId}`, { headers })
   return res.json() as Promise<ApiResponse<JobResult>>
 }
