@@ -8,3 +8,21 @@ pre-commit:
       run: bash ~/.nexus/scripts/check-env-sync.sh
     claude-md-sync:
       run: bash ~/.nexus/scripts/sync-claude-md.sh
+    lint-client:
+      glob: "client/**/*.{ts,tsx}"
+      run: cd client && npm run lint
+    lint-server:
+      glob: "server/**/*.ts"
+      run: cd server && npm run lint
+    typecheck-client:
+      glob: "client/**/*.{ts,tsx}"
+      run: cd client && npm run typecheck
+    typecheck-server:
+      glob: "server/**/*.ts,shared/**/*.ts"
+      run: cd server && npm run typecheck
+    no-secrets:
+      run: |
+        if git diff --cached --name-only | grep -E '^\.env' | grep -qv '^\.env\.example$'; then
+          echo "ERROR: attempting to commit a .env file — aborting"
+          exit 1
+        fi
