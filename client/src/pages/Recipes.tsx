@@ -4,6 +4,38 @@ import { useAuth } from '../hooks/useAuth.js'
 import { getRecipes, type Recipe } from '../lib/api.js'
 import BottomNav from '../components/BottomNav.js'
 
+function RecipeCard({ recipe }: { recipe: Recipe }) {
+  const [thumbError, setThumbError] = useState(false)
+  return (
+    <Link to={`/recipes/${recipe.id}`} className="recipe-card">
+      {recipe.thumbnail_url && !thumbError ? (
+        <img
+          src={recipe.thumbnail_url}
+          alt={recipe.title}
+          className="recipe-card-thumb"
+          onError={() => setThumbError(true)}
+        />
+      ) : (
+        <div className="recipe-card-thumb">🍽️</div>
+      )}
+      <div className="recipe-card-body">
+        <div className="recipe-card-title">{recipe.title}</div>
+        <div className="recipe-card-meta">
+          {[formatTime(recipe.prep_time_minutes), formatTime(recipe.cook_time_minutes)]
+            .filter(Boolean)
+            .join(' · ') || `${recipe.ingredients.length} ingredients`}
+        </div>
+      </div>
+    </Link>
+  )
+}
+
+function formatTime(mins?: number) {
+  if (!mins) return null
+  if (mins < 60) return `${mins}m`
+  return `${Math.floor(mins / 60)}h ${mins % 60 > 0 ? `${mins % 60}m` : ''}`.trim()
+}
+
 export default function Recipes() {
   const { session } = useAuth()
   const [recipes, setRecipes] = useState<Recipe[]>([])
@@ -22,12 +54,6 @@ export default function Recipes() {
   const filtered = recipes.filter((r) =>
     r.title.toLowerCase().includes(search.toLowerCase())
   )
-
-  function formatTime(mins?: number) {
-    if (!mins) return null
-    if (mins < 60) return `${mins}m`
-    return `${Math.floor(mins / 60)}h ${mins % 60 > 0 ? `${mins % 60}m` : ''}`.trim()
-  }
 
   return (
     <div className="page">
@@ -94,25 +120,7 @@ export default function Recipes() {
         ) : (
           <div className="recipe-grid">
             {filtered.map((recipe) => (
-              <Link key={recipe.id} to={`/recipes/${recipe.id}`} className="recipe-card">
-                {recipe.thumbnail_url ? (
-                  <img
-                    src={recipe.thumbnail_url}
-                    alt={recipe.title}
-                    className="recipe-card-thumb"
-                  />
-                ) : (
-                  <div className="recipe-card-thumb">🍽️</div>
-                )}
-                <div className="recipe-card-body">
-                  <div className="recipe-card-title">{recipe.title}</div>
-                  <div className="recipe-card-meta">
-                    {[formatTime(recipe.prep_time_minutes), formatTime(recipe.cook_time_minutes)]
-                      .filter(Boolean)
-                      .join(' · ') || `${recipe.ingredients.length} ingredients`}
-                  </div>
-                </div>
-              </Link>
+              <RecipeCard key={recipe.id} recipe={recipe} />
             ))}
           </div>
         )}

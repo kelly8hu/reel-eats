@@ -8,6 +8,7 @@ export default function RecipeDetail() {
   const navigate = useNavigate()
   const [recipe, setRecipe] = useState<Recipe | null>(null)
   const [loading, setLoading] = useState(true)
+  const [thumbError, setThumbError] = useState(false)
 
   useEffect(() => {
     if (!id) return
@@ -54,8 +55,13 @@ export default function RecipeDetail() {
   return (
     <div className="page">
       {/* Hero image */}
-      {recipe.thumbnail_url ? (
-        <img src={recipe.thumbnail_url} alt={recipe.title} className="recipe-hero" />
+      {recipe.thumbnail_url && !thumbError ? (
+        <img
+          src={recipe.thumbnail_url}
+          alt={recipe.title}
+          className="recipe-hero"
+          onError={() => setThumbError(true)}
+        />
       ) : (
         <div className="recipe-hero-placeholder">🍽️</div>
       )}
