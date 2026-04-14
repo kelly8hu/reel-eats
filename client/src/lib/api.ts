@@ -37,3 +37,42 @@ export async function getJobStatus(jobId: string): Promise<ApiResponse<JobResult
   const res = await fetch(`${API_BASE}/api/recipes/jobs/${jobId}`, { headers })
   return res.json() as Promise<ApiResponse<JobResult>>
 }
+
+export interface Ingredient {
+  name: string
+  quantity: string
+  unit?: string
+}
+
+export interface RecipeStep {
+  step: number
+  instruction: string
+  duration_seconds?: number
+}
+
+export interface Recipe {
+  id: string
+  title: string
+  description?: string
+  ingredients: Ingredient[]
+  steps: RecipeStep[]
+  servings?: number
+  prep_time_minutes?: number
+  cook_time_minutes?: number
+  health_notes?: string[]
+  instagram_url: string
+  thumbnail_url?: string
+  created_at?: string
+}
+
+export async function getRecipes(): Promise<ApiResponse<Recipe[]>> {
+  const headers = await authHeaders()
+  const res = await fetch(`${API_BASE}/api/recipes`, { headers })
+  return res.json() as Promise<ApiResponse<Recipe[]>>
+}
+
+export async function getRecipe(id: string): Promise<ApiResponse<Recipe>> {
+  const headers = await authHeaders()
+  const res = await fetch(`${API_BASE}/api/recipes/${id}`, { headers })
+  return res.json() as Promise<ApiResponse<Recipe>>
+}
