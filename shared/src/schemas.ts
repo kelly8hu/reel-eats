@@ -25,7 +25,7 @@ export const RecipeSchema = z.object({
   description: z.string().optional(),
   ingredients: z.array(IngredientSchema),
   steps: z.array(RecipeStepSchema),
-  servings: z.coerce.number().int().positive().optional(),
+  servings: z.coerce.number().int().nonnegative().optional().nullable(),
   prep_time_minutes: z.coerce.number().int().nonnegative().optional(),
   cook_time_minutes: z.coerce.number().int().nonnegative().optional(),
   health_notes: z.array(z.string()).optional(),
