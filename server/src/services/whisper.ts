@@ -8,10 +8,7 @@ if (!REPLICATE_API_TOKEN) {
   throw new Error('Missing required env var: REPLICATE_API_TOKEN')
 }
 
-// Pin to a specific version for reproducibility.
-// Check https://replicate.com/openai/whisper for the latest version hash.
-const WHISPER_MODEL =
-  'openai/whisper:4d50797290df275329f202e48c76360b3f22b08d53278b9ec54a84e622c18d8'
+const WHISPER_MODEL = 'openai/whisper'
 
 const replicate = new Replicate({ auth: REPLICATE_API_TOKEN })
 
