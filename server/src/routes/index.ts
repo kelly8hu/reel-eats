@@ -16,7 +16,7 @@ router.post('/test-pipeline', async (req: Request, res: Response) => {
     res.status(400).json({ error: parsed.error.issues })
     return
   }
-  const TEST_USER_ID = '00000000-0000-0000-0000-000000000001'
+  const TEST_USER_ID = 'c80bf05e-c022-4742-9785-33e3ee4ed5f6'
   const job = await db.createJob(TEST_USER_ID, parsed.data.url)
   void processJob(job.id, TEST_USER_ID, parsed.data.url)
   res.status(202).json({ data: { jobId: job.id } })
