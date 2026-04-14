@@ -3,14 +3,14 @@ import { supabaseAdmin } from '../lib/supabaseAdmin.js'
 import { logger } from '../lib/logger.js'
 
 // Explicit column lists — never select('*') in production
-const JOB_COLS = 'id, status, recipe_id, error, created_at, updated_at'
+const JOB_COLS = 'id, url, status, recipe_id, error, created_at, updated_at'
 const RECIPE_COLS =
   'id, title, description, ingredients, steps, servings, prep_time_minutes, cook_time_minutes, health_notes, instagram_url, thumbnail_url, created_at'
 
-export async function createJob(userId: string): Promise<Job> {
+export async function createJob(userId: string, url: string): Promise<Job> {
   const { data, error } = await supabaseAdmin
     .from('jobs')
-    .insert({ user_id: userId, status: 'pending' as JobStatus })
+    .insert({ user_id: userId, status: 'pending' as JobStatus, url })
     .select(JOB_COLS)
     .single()
 

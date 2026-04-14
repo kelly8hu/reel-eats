@@ -8,6 +8,9 @@ import { router } from './routes/index.js'
 
 const app = express()
 
+// Trust Railway's proxy so rate limiting and IP detection work correctly
+app.set('trust proxy', 1)
+
 // Security headers
 app.use(helmet())
 

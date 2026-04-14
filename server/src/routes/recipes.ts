@@ -46,7 +46,7 @@ recipesRouter.post(
       return
     }
 
-    const job = await db.createJob(req.user!.id)
+    const job = await db.createJob(req.user!.id, parsed.data.url)
 
     // Fire-and-forget — client polls GET /jobs/:jobId for progress
     void processJob(job.id, req.user!.id, parsed.data.url)
