@@ -14,9 +14,9 @@ export const IngredientSchema = z.object({
 })
 
 export const RecipeStepSchema = z.object({
-  step: z.number().int().positive(),
+  step: z.coerce.number().int().positive(),
   instruction: z.string(),
-  duration_seconds: z.number().int().nonnegative().optional(),
+  duration_seconds: z.coerce.number().int().nonnegative().optional(),
 })
 
 export const RecipeSchema = z.object({
@@ -25,9 +25,9 @@ export const RecipeSchema = z.object({
   description: z.string().optional(),
   ingredients: z.array(IngredientSchema),
   steps: z.array(RecipeStepSchema),
-  servings: z.number().int().positive().optional(),
-  prep_time_minutes: z.number().int().nonnegative().optional(),
-  cook_time_minutes: z.number().int().nonnegative().optional(),
+  servings: z.coerce.number().int().positive().optional(),
+  prep_time_minutes: z.coerce.number().int().nonnegative().optional(),
+  cook_time_minutes: z.coerce.number().int().nonnegative().optional(),
   health_notes: z.array(z.string()).optional(),
   instagram_url: z.string().url(),
   thumbnail_url: z.string().url().optional(),
