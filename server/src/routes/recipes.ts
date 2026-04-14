@@ -107,7 +107,12 @@ export async function processJob(jobId: string, userId: string, url: string): Pr
     const reel = await scrapeReel(url)
     tempPath = reel.tempVideoPath
 
-    const whisperTranscript = await transcribeVideo(tempPath)
+    let whisperTranscript = ''
+    try {
+      whisperTranscript = await transcribeVideo(tempPath)
+    } catch (err) {
+      logger.warn({ err, jobId }, 'Whisper transcription failed — falling back to Apify transcript')
+    }
 
     const recipe = await extractRecipe({
       instagramUrl: url,
