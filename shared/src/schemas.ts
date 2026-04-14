@@ -31,7 +31,7 @@ export const RecipeSchema = z.object({
   health_notes: z.array(z.string()).optional(),
   instagram_url: z.string().url(),
   thumbnail_url: z.string().url().optional(),
-  created_at: z.string().datetime().optional(),
+  created_at: z.string().optional(),
 })
 
 export const JobStatusSchema = z.enum(['pending', 'processing', 'completed', 'failed'])
@@ -39,10 +39,10 @@ export const JobStatusSchema = z.enum(['pending', 'processing', 'completed', 'fa
 export const JobSchema = z.object({
   id: z.string().uuid(),
   status: JobStatusSchema,
-  recipe_id: z.string().uuid().optional(),
-  error: z.string().optional(),
-  created_at: z.string().datetime(),
-  updated_at: z.string().datetime(),
+  recipe_id: z.string().uuid().nullable().optional(),
+  error: z.string().nullable().optional(),
+  created_at: z.string(),
+  updated_at: z.string(),
 })
 
 export const ScrapeRequestSchema = z.object({
