@@ -65,7 +65,7 @@ describe('createJob', () => {
   it('returns a parsed Job on success', async () => {
     mockSingle.mockResolvedValue({ data: mockJobData, error: null })
     const { createJob } = await import('./db.js')
-    const job = await createJob('user-abc')
+    const job = await createJob('user-abc', 'https://www.instagram.com/reel/abc123/')
     expect(job.id).toBe(mockJobData.id)
     expect(job.status).toBe('pending')
   })
@@ -73,7 +73,7 @@ describe('createJob', () => {
   it('throws when Supabase returns an error', async () => {
     mockSingle.mockResolvedValue({ data: null, error: { message: 'DB down' } })
     const { createJob } = await import('./db.js')
-    await expect(createJob('user-abc')).rejects.toThrow('Failed to create job: DB down')
+    await expect(createJob('user-abc', 'https://www.instagram.com/reel/abc123/')).rejects.toThrow('Failed to create job: DB down')
   })
 })
 

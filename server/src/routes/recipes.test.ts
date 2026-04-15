@@ -106,7 +106,7 @@ describe('POST /api/recipes', () => {
 
   it('calls db.createJob with the authenticated user id', async () => {
     await request(app).post('/api/recipes').send({ url: VALID_URL })
-    expect(vi.mocked(db.createJob)).toHaveBeenCalledWith('test-user-id')
+    expect(vi.mocked(db.createJob)).toHaveBeenCalledWith('test-user-id', VALID_URL)
   })
 })
 

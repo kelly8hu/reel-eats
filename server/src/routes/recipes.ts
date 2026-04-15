@@ -6,6 +6,7 @@ import { scrapeReel, cleanupTempFile } from '../services/scraper.js'
 import { transcribeVideo } from '../services/whisper.js'
 import { extractRecipe } from '../services/ai.js'
 import * as db from '../services/db.js'
+import { uploadThumbnail } from '../services/storage.js'
 import { logger } from '../lib/logger.js'
 
 export const recipesRouter = Router()
@@ -107,6 +108,13 @@ export async function processJob(jobId: string, userId: string, url: string): Pr
     const reel = await scrapeReel(url)
     tempPath = reel.tempVideoPath
 
+    // Download thumbnail server-side and store in Supabase Storage so it never expires
+    let thumbnailUrl = reel.thumbnailUrl
+    if (thumbnailUrl) {
+      const stored = await uploadThumbnail(thumbnailUrl, userId, jobId)
+      if (stored) thumbnailUrl = stored
+    }
+
     let whisperTranscript = ''
     try {
       whisperTranscript = await transcribeVideo(tempPath)
@@ -116,7 +124,7 @@ export async function processJob(jobId: string, userId: string, url: string): Pr
 
     const recipe = await extractRecipe({
       instagramUrl: url,
-      thumbnailUrl: reel.thumbnailUrl,
+      thumbnailUrl,
       caption: reel.caption,
       apifyTranscript: reel.apifyTranscript,
       whisperTranscript,

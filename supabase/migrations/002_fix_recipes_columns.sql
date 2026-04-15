@@ -7,10 +7,7 @@ alter table recipes
   add column if not exists prep_time_minutes integer,
   add column if not exists cook_time_minutes integer;
 
--- Migrate existing data if any rows exist
-update recipes set instagram_url = source_url where instagram_url is null;
-
--- Drop old column
+-- Drop old column if it exists (was renamed in initial schema)
 alter table recipes drop column if exists source_url;
 
 -- Change health_notes from text to jsonb array

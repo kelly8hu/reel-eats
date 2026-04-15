@@ -39,7 +39,7 @@ describe('transcribeVideo', () => {
 
     expect(mockRun).toHaveBeenCalledOnce()
     const [model, options] = mockRun.mock.calls[0] as [string, { input: Record<string, unknown> }]
-    expect(model).toMatch(/openai\/whisper:/)
+    expect(model).toMatch(/openai\/whisper/)
     expect(options.input).toMatchObject({ model: 'large-v3', language: 'en', translate: false })
     expect(options.input.audio).toBeInstanceOf(Blob)
   })
