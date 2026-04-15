@@ -28,7 +28,14 @@ export const RecipeSchema = z.object({
   servings: z.coerce.number().int().nonnegative().optional().nullable(),
   prep_time_minutes: z.coerce.number().int().nonnegative().optional(),
   cook_time_minutes: z.coerce.number().int().nonnegative().optional(),
-  health_notes: z.array(z.string()).optional(),
+  health_notes: z.preprocess(
+    (val) => {
+      if (!Array.isArray(val)) return val
+      // Flatten nested arrays produced by a DB migration bug: [["a","b"]] → ["a","b"]
+      return val.flatMap((item) => (Array.isArray(item) ? item : [item]))
+    },
+    z.array(z.string()).optional()
+  ),
   instagram_url: z.string().url(),
   thumbnail_url: z.string().url().optional(),
   created_at: z.string().optional(),
