@@ -65,7 +65,14 @@ ${input.apifyTranscript || '(none)'}
 Audio transcript (from Whisper — most detailed):
 ${input.whisperTranscript || '(none)'}
 
-Use all three sources. Whisper is the most accurate. Extract every ingredient, quantity, and step. Add health_notes for notable observations (e.g. high protein, dairy-free, high sodium).`
+Use all three sources. Whisper is the most accurate when available.
+
+Rules:
+- Extract every ingredient, quantity, unit, and step you can find.
+- If a quantity or unit is not mentioned, make a reasonable culinary estimate based on the dish and context (e.g. "1 tbsp" for miso paste, "2 cups" for broth). Never return "<UNKNOWN>" or leave quantity blank.
+- If servings, prep time, or cook time are not stated, estimate them based on the recipe type.
+- Add health_notes for notable observations (e.g. high protein, dairy-free, high sodium).
+- Write clear, actionable step instructions even if the video is brief — infer standard cooking steps from context.`
 }
 
 const RECIPE_TOOL: Anthropic.Tool = {
@@ -81,9 +88,9 @@ const RECIPE_TOOL: Anthropic.Tool = {
         items: {
           type: 'object',
           properties: {
-            name: { type: 'string' },
-            quantity: { type: 'string' },
-            unit: { type: 'string' },
+            name: { type: 'string', description: 'Ingredient name' },
+            quantity: { type: 'string', description: 'Amount — estimate if not stated, never use "<UNKNOWN>"' },
+            unit: { type: 'string', description: 'Unit of measurement (tbsp, cup, g, etc.) — omit if not applicable' },
           },
           required: ['name', 'quantity'],
         },
