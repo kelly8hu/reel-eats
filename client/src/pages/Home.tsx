@@ -10,6 +10,7 @@ type JobState =
   | { phase: 'submitting' }
   | { phase: 'processing'; jobId: string }
   | { phase: 'completed'; recipeId: string }
+  | { phase: 'duplicate'; recipeId: string }
   | { phase: 'failed'; error: string }
 
 const MOODS = ['😴 Low energy', '🤢 Stomachache', '😰 Stressed', '💪 Post-workout', '🤒 Sick', '🧘 Balanced']
@@ -30,6 +31,10 @@ export default function Home() {
     const result = await submitRecipe(urlToSubmit)
     if (result.error) {
       setJob({ phase: 'failed', error: result.error.message })
+      return
+    }
+    if (result.data.duplicate) {
+      setJob({ phase: 'duplicate', recipeId: result.data.recipeId })
       return
     }
     setJob({ phase: 'processing', jobId: result.data.jobId })
@@ -162,6 +167,22 @@ export default function Home() {
               <div>
                 <p style={{ fontWeight: 700, fontSize: 14 }}>Recipe saved!</p>
                 <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>Tap to view</p>
+              </div>
+              <button
+                className="btn btn-primary"
+                style={{ padding: '8px 16px', fontSize: 13 }}
+                onClick={() => navigate(`/recipes/${job.recipeId}`)}
+              >
+                View →
+              </button>
+            </div>
+          )}
+
+          {job.phase === 'duplicate' && (
+            <div className="card" style={{ padding: 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div>
+                <p style={{ fontWeight: 700, fontSize: 14 }}>Already saved</p>
+                <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>You saved this reel before</p>
               </div>
               <button
                 className="btn btn-primary"

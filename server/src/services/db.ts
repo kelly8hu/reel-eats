@@ -92,3 +92,26 @@ export async function getRecipe(recipeId: string, userId: string): Promise<Recip
   if (error) throw new Error(`Failed to fetch recipe: ${error.message}`)
   return RecipeSchema.parse(data)
 }
+
+export async function findRecipeByUrl(userId: string, url: string): Promise<Recipe | null> {
+  const { data, error } = await supabaseAdmin
+    .from('recipes')
+    .select(RECIPE_COLS)
+    .eq('user_id', userId)
+    .eq('instagram_url', url)
+    .maybeSingle()
+
+  if (error) throw new Error(`Failed to check for duplicate: ${error.message}`)
+  if (!data) return null
+  return RecipeSchema.parse(data)
+}
+
+export async function deleteRecipe(recipeId: string, userId: string): Promise<void> {
+  const { error } = await supabaseAdmin
+    .from('recipes')
+    .delete()
+    .eq('id', recipeId)
+    .eq('user_id', userId)
+
+  if (error) throw new Error(`Failed to delete recipe: ${error.message}`)
+}

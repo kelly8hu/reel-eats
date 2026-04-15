@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { getRecipe, type Recipe } from '../lib/api.js'
+import { getRecipe, deleteRecipe, type Recipe } from '../lib/api.js'
 import BottomNav from '../components/BottomNav.js'
 
 export default function RecipeDetail() {
@@ -9,6 +9,15 @@ export default function RecipeDetail() {
   const [recipe, setRecipe] = useState<Recipe | null>(null)
   const [loading, setLoading] = useState(true)
   const [thumbError, setThumbError] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
+
+  async function handleDelete() {
+    if (!id) return
+    setDeleting(true)
+    await deleteRecipe(id)
+    navigate('/recipes')
+  }
 
   useEffect(() => {
     if (!id) return
@@ -169,6 +178,37 @@ export default function RecipeDetail() {
         >
           📸 View original Reel
         </a>
+
+        {/* Delete */}
+        {confirmDelete ? (
+          <div className="card" style={{ padding: 16, borderLeft: '3px solid var(--red)', marginBottom: 8 }}>
+            <p style={{ fontWeight: 700, fontSize: 14, marginBottom: 8 }}>Delete this recipe?</p>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button
+                className="btn btn-primary btn-full"
+                style={{ background: 'var(--red)' }}
+                disabled={deleting}
+                onClick={() => void handleDelete()}
+              >
+                {deleting ? 'Deleting…' : 'Yes, delete'}
+              </button>
+              <button
+                className="btn btn-secondary btn-full"
+                onClick={() => setConfirmDelete(false)}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button
+            className="btn btn-secondary btn-full"
+            style={{ color: 'var(--red)', marginBottom: 8 }}
+            onClick={() => setConfirmDelete(true)}
+          >
+            Delete recipe
+          </button>
+        )}
       </div>
 
       <BottomNav />

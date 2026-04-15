@@ -47,6 +47,15 @@ recipesRouter.post(
       return
     }
 
+    // Return existing recipe instead of re-scraping the same reel
+    const existing = await db.findRecipeByUrl(req.user!.id, parsed.data.url)
+    if (existing) {
+      res.status(409).json({
+        error: { code: 'DUPLICATE', message: 'You already saved this reel', recipeId: existing.id },
+      })
+      return
+    }
+
     const job = await db.createJob(req.user!.id, parsed.data.url)
 
     // Fire-and-forget — client polls GET /jobs/:jobId for progress
@@ -77,6 +86,21 @@ recipesRouter.get(
   asyncHandler(async (req, res) => {
     const recipes = await db.getRecipes(req.user!.id)
     res.json({ data: recipes })
+  })
+)
+
+// DELETE /api/recipes/:id — delete a saved recipe
+recipesRouter.delete(
+  '/:id',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const recipe = await db.getRecipe(req.params.id, req.user!.id)
+    if (!recipe) {
+      res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Recipe not found' } })
+      return
+    }
+    await db.deleteRecipe(req.params.id, req.user!.id)
+    res.status(204).send()
   })
 )
 

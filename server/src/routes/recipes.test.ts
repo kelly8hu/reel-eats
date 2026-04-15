@@ -23,6 +23,8 @@ vi.mock('../services/db.js', () => ({
   saveRecipe: vi.fn(),
   getRecipes: vi.fn(),
   getRecipe: vi.fn(),
+  findRecipeByUrl: vi.fn().mockResolvedValue(null),
+  deleteRecipe: vi.fn().mockResolvedValue(undefined),
 }))
 
 vi.mock('../services/scraper.js', () => ({

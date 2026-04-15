@@ -13,14 +13,22 @@ async function authHeaders(): Promise<Record<string, string>> {
 
 export type ApiResponse<T> = { data: T; error?: never } | { data?: never; error: { code: string; message: string } }
 
-export async function submitRecipe(url: string): Promise<ApiResponse<{ jobId: string }>> {
+export type SubmitRecipeResult =
+  | { jobId: string; duplicate?: never }
+  | { duplicate: true; recipeId: string; jobId?: never }
+
+export async function submitRecipe(url: string): Promise<ApiResponse<SubmitRecipeResult>> {
   const headers = await authHeaders()
   const res = await fetch(`${API_BASE}/api/recipes`, {
     method: 'POST',
     headers,
     body: JSON.stringify({ url }),
   })
-  return res.json() as Promise<ApiResponse<{ jobId: string }>>
+  const body = await res.json() as { data?: { jobId: string }; error?: { code: string; message: string; recipeId?: string } }
+  if (res.status === 409 && body.error?.code === 'DUPLICATE') {
+    return { data: { duplicate: true, recipeId: body.error.recipeId! } }
+  }
+  return body as ApiResponse<SubmitRecipeResult>
 }
 
 export type JobStatus = 'pending' | 'processing' | 'completed' | 'failed'
@@ -75,4 +83,12 @@ export async function getRecipe(id: string): Promise<ApiResponse<Recipe>> {
   const headers = await authHeaders()
   const res = await fetch(`${API_BASE}/api/recipes/${id}`, { headers })
   return res.json() as Promise<ApiResponse<Recipe>>
+}
+
+export async function deleteRecipe(id: string): Promise<{ error?: { message: string } }> {
+  const headers = await authHeaders()
+  const res = await fetch(`${API_BASE}/api/recipes/${id}`, { method: 'DELETE', headers })
+  if (res.status === 204) return {}
+  const body = await res.json() as { error?: { message: string } }
+  return body
 }
