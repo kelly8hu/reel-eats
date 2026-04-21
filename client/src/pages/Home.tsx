@@ -8,6 +8,7 @@ import BottomNav from '../components/BottomNav.js'
 type JobState =
   | { phase: 'idle' }
   | { phase: 'submitting' }
+  | { phase: 'queued' }
   | { phase: 'processing'; jobId: string }
   | { phase: 'completed'; recipeId: string }
   | { phase: 'duplicate'; recipeId: string }
@@ -25,7 +26,7 @@ export default function Home() {
   const [magicLinkSent, setMagicLinkSent] = useState(false)
   const [selectedMood, setSelectedMood] = useState<string | null>(null)
 
-  const handleSubmit = useCallback(async (urlToSubmit: string) => {
+  const handleSubmit = useCallback(async (urlToSubmit: string, fromShare = false) => {
     if (!urlToSubmit.trim()) return
     setJob({ phase: 'submitting' })
     const result = await submitRecipe(urlToSubmit)
@@ -37,6 +38,11 @@ export default function Home() {
       setJob({ phase: 'duplicate', recipeId: result.data.recipeId })
       return
     }
+    // When coming from the share sheet, just confirm queued — no need to wait
+    if (fromShare) {
+      setJob({ phase: 'queued' })
+      return
+    }
     setJob({ phase: 'processing', jobId: result.data.jobId })
   }, [])
 
@@ -44,7 +50,7 @@ export default function Home() {
     const sharedUrl = (location.state as { sharedUrl?: string } | null)?.sharedUrl
     if (!sharedUrl) return
     setUrl(sharedUrl)
-    if (session) void handleSubmit(sharedUrl)
+    if (session) void handleSubmit(sharedUrl, true)
   }, [session, location.state, handleSubmit])
 
   const jobId = job.phase === 'processing' ? job.jobId : null
@@ -153,6 +159,22 @@ export default function Home() {
               {job.phase === 'submitting' || job.phase === 'processing' ? 'Saving…' : 'Save Recipe'}
             </button>
           </form>
+
+          {job.phase === 'queued' && (
+            <div className="card" style={{ padding: 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div>
+                <p style={{ fontWeight: 700, fontSize: 14 }}>Recipe queued!</p>
+                <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>Ready in ~30 sec. You can close this.</p>
+              </div>
+              <button
+                className="btn btn-primary"
+                style={{ padding: '8px 16px', fontSize: 13 }}
+                onClick={() => navigate('/recipes')}
+              >
+                Recipes →
+              </button>
+            </div>
+          )}
 
           {job.phase === 'processing' && (
             <div className="card" style={{ padding: 16 }}>
