@@ -316,8 +316,7 @@ production URL.
 │       ├── middleware/  # requireAuth (JWT → req.user)
 │       └── lib/         # supabaseAdmin (service role), pino logger
 ├── shared/              # zod schemas + inferred types, imported by both sides
-├── supabase/migrations/ # SQL migrations, RLS policies
-└── TECHNICAL_DESIGN.md  # deeper design doc: trade-offs, failure modes, future work
+└── supabase/migrations/ # SQL migrations, RLS policies
 ```
 
 Dependency direction is enforced by convention and reviewed on every change:
@@ -335,5 +334,3 @@ No business logic lives in route handlers or components.
 - **No offline recipe access** — the service worker caches static assets only.
 - A dev-only unauthenticated test route exists in `server/src/routes/index.ts` and is
   flagged for removal before public launch.
-
-See [`TECHNICAL_DESIGN.md`](./TECHNICAL_DESIGN.md) for the full design document.
