@@ -2,11 +2,11 @@
 
 **Turn any Instagram Reel into a structured, cookable recipe.**
 
-Food Reels are great at inspiring you and terrible at feeding you — the quantities are
-spoken, never written; the steps scroll past in 2 seconds; and the post you saved is
+Food Reels are great at inspiring you and terrible at feeding you. The quantities are
+spoken and never written somewhere easily accessible. The steps scroll past in 2 seconds; and the post you saved is
 buried three weeks deep in your collection. Reel Eats fixes that: share a Reel to the
-app and ~30 seconds later you have a real recipe — ingredients with amounts, numbered
-steps, times, and health notes — saved to your account.
+app and ~30 seconds later you have a real recipe (ingredients with amounts, numbered
+steps, times, and health notes) saved to your account.
 
 It's a PWA, so it installs to a phone home screen and registers as a **native share
 target**: tap Share on a Reel in Instagram → tap Reel Eats → done. No copy-paste, no app store.
