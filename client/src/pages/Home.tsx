@@ -76,6 +76,14 @@ export default function Home() {
     setMagicLinkSent(true)
   }
 
+  // Redirects to Google; Supabase handles the callback and the session lands in localStorage
+  async function signInWithGoogle() {
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.origin },
+    })
+  }
+
   if (loading) {
     return (
       <div className="page" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -113,19 +121,27 @@ export default function Home() {
               <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>We sent a sign-in link to {email}</p>
             </div>
           ) : (
-            <form onSubmit={(e) => { e.preventDefault(); void sendMagicLink() }} className="stack stack-sm">
-              <input
-                className="input"
-                type="email"
-                placeholder="your@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-              <button type="submit" className="btn btn-primary btn-full">
-                Send sign-in link
+            <div className="stack stack-md">
+              <button className="btn btn-primary btn-full" onClick={() => void signInWithGoogle()}>
+                Continue with Google
               </button>
-            </form>
+              <p style={{ textAlign: 'center', fontSize: 12, color: 'var(--text-muted)' }}>
+                or use an email link
+              </p>
+              <form onSubmit={(e) => { e.preventDefault(); void sendMagicLink() }} className="stack stack-sm">
+                <input
+                  className="input"
+                  type="email"
+                  placeholder="your@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+                <button type="submit" className="btn btn-secondary btn-full">
+                  Send sign-in link
+                </button>
+              </form>
+            </div>
           )}
         </div>
       </div>
