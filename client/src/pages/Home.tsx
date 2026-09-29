@@ -196,7 +196,7 @@ export default function Home() {
             <div className="card" style={{ padding: 16 }}>
               <p style={{ fontSize: 13, fontWeight: 600, marginBottom: 10 }}>Extracting recipe…</p>
               <div className="processing-bar"><div className="processing-bar-fill" /></div>
-              <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 8 }}>This takes about 30 seconds</p>
+              <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 8 }}>Usually under a minute</p>
             </div>
           )}
 
@@ -234,8 +234,9 @@ export default function Home() {
 
           {job.phase === 'failed' && (
             <div className="card" style={{ padding: 16, borderLeft: '3px solid var(--red)' }}>
-              <p style={{ fontWeight: 700, fontSize: 14, marginBottom: 4 }}>Something went wrong</p>
-              <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{job.error}</p>
+              <p style={{ fontWeight: 700, fontSize: 14, marginBottom: 4 }}>We couldn't read that Reel</p>
+              {/* Raw pipeline errors stay in server logs — the user only sees a friendly line */}
+              <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>Try another one, or check the link is a public Instagram Reel.</p>
             </div>
           )}
         </div>

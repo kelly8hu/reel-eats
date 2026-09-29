@@ -22,7 +22,8 @@ export const RecipeStepSchema = z.object({
 export const RecipeSchema = z.object({
   id: z.string().uuid().optional(),
   title: z.string(),
-  description: z.string().optional(),
+  // Postgres returns null for unset columns — accept it so one sparse row can't fail the whole list
+  description: z.string().nullable().optional(),
   ingredients: z.array(IngredientSchema),
   steps: z.array(RecipeStepSchema),
   servings: z.coerce.number().int().nonnegative().optional().nullable(),
@@ -34,10 +35,10 @@ export const RecipeSchema = z.object({
       // Flatten nested arrays produced by a DB migration bug: [["a","b"]] → ["a","b"]
       return val.flatMap((item) => (Array.isArray(item) ? item : [item]))
     },
-    z.array(z.string()).optional()
+    z.array(z.string()).nullable().optional()
   ),
   instagram_url: z.string().url(),
-  thumbnail_url: z.string().url().optional(),
+  thumbnail_url: z.string().url().nullable().optional(),
   created_at: z.string().optional(),
 })
 
