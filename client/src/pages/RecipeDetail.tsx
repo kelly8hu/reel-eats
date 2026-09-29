@@ -33,6 +33,13 @@ export default function RecipeDetail() {
     return `${Math.floor(mins / 60)}h ${mins % 60 > 0 ? `${mins % 60}m` : ''}`.trim()
   }
 
+  // Sub-minute steps show seconds instead of rounding to "0 min"
+  function formatDuration(seconds?: number) {
+    if (!seconds) return null
+    if (seconds < 60) return `${seconds} sec`
+    return `${Math.round(seconds / 60)} min`
+  }
+
   if (loading) {
     return (
       <div className="page">
@@ -157,9 +164,9 @@ export default function RecipeDetail() {
                 <div className="step-number">{step.step}</div>
                 <div>
                   <p className="step-text">{step.instruction}</p>
-                  {step.duration_seconds && (
+                  {formatDuration(step.duration_seconds) && (
                     <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>
-                      ⏱ {Math.round(step.duration_seconds / 60)} min
+                      ⏱ {formatDuration(step.duration_seconds)}
                     </p>
                   )}
                 </div>

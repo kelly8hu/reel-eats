@@ -150,6 +150,16 @@ describe('getRecipes', () => {
     expect(recipes[0].title).toBe('Simple Pasta')
   })
 
+  it('accepts rows where nullable columns come back as null', async () => {
+    const sparseRow = { ...mockRecipeData, description: null, thumbnail_url: null, health_notes: null }
+    mockOrder.mockResolvedValue({ data: [sparseRow], error: null })
+    const { getRecipes } = await import('./db.js')
+    const recipes = await getRecipes('user-id')
+    expect(recipes).toHaveLength(1)
+    expect(recipes[0].title).toBe('Simple Pasta')
+    expect(recipes[0].thumbnail_url).toBeNull()
+  })
+
   it('returns empty array when no recipes exist', async () => {
     mockOrder.mockResolvedValue({ data: null, error: null })
     const { getRecipes } = await import('./db.js')
