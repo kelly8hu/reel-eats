@@ -9,7 +9,6 @@ export default function Recipes() {
   const [recipes, setRecipes] = useState<Recipe[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
-  const [pantryOnly, setPantryOnly] = useState(false)
 
   useEffect(() => {
     if (!session) return
@@ -50,28 +49,6 @@ export default function Recipes() {
             </button>
           )}
         </div>
-
-        {/* Pantry toggle */}
-        <div className="toggle-row">
-          <div>
-            <div className="toggle-label">🥦 Use my pantry</div>
-            <div className="toggle-sub">Show only recipes I can make now</div>
-          </div>
-          <label className="toggle">
-            <input
-              type="checkbox"
-              checked={pantryOnly}
-              onChange={(e) => setPantryOnly(e.target.checked)}
-            />
-            <span className="toggle-track" />
-          </label>
-        </div>
-
-        {pantryOnly && (
-          <div className="card" style={{ padding: '12px 14px', fontSize: 13, color: 'var(--text-muted)' }}>
-            Pantry filtering coming soon — add ingredients in your Profile.
-          </div>
-        )}
 
         {/* Recipe grid */}
         {loading ? (
