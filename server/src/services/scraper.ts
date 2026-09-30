@@ -32,6 +32,9 @@ interface ApifyItem {
   text?: string
   accessibility_caption?: string
   transcript?: string
+  /** Set by the actor when the post is missing, private, or blocked (e.g. "not_found") */
+  error?: string
+  errorDescription?: string
 }
 
 export async function scrapeReel(instagramUrl: string): Promise<ScrapedReel> {
@@ -62,7 +65,12 @@ export async function scrapeReel(instagramUrl: string): Promise<ScrapedReel> {
   }
 
   const item = items[0]
-  const videoUrl = item.videoUrl ?? item.url
+  if (item.error) {
+    throw new Error(`Reel not found or not public (${item.error})`)
+  }
+  // Only a real CDN video URL will do — item.url is the post page, not a video,
+  // and downloading it produces an HTML file that yields an empty recipe.
+  const videoUrl = item.videoUrl
   if (!videoUrl) {
     throw new Error('Apify result did not include a video URL')
   }
