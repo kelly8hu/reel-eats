@@ -69,7 +69,7 @@ pipeline (~30 s), the friendly failure card, mood recommendations, "Good for" ta
 |---|---|---|---|
 | 0–3 | **Open + discovery** | Camera on you, not the app | "Quick question before I show you anything — do you ever cook from Instagram or TikTok? When was the last time you saved a food video and actually made it?" *Listen. Their answer is your hook.* |
 | 3–5 | **Problem** | Switch to the **Instagram tab**, play 5 s of the reel | "Looks incredible. Where's the recipe? She says 'a bit of miso' — how much? The steps go by in four seconds. So you screenshot it and it dies in your camera roll with the other 300." |
-| 5–6 | **Magic** | Switch to Reel Eats. Paste the **demo reel URL from your notes** (not the address bar). Tap Save. | "One paste. On a phone it's one tap from the share sheet — I'm pasting so you can see it on my screen." |
+| 5–6 | **Magic** | On the Instagram tab: reel's **⋯ → Copy link**. Switch to Reel Eats, paste, tap Save. *(If Instagram's copy gives a URL the app rejects, paste the clean `/reel/` URL from your notes instead.)* | "Copy the link, paste it in. That's the whole input." |
 | 6–7 | **Wait, gracefully** | Processing card shows. **Stay on Home.** | "While it works — it's listening to what she says, reading her caption, and building the recipe. Usually under a minute." *Fill with the story of why blank quantities are useless.* |
 | 7–10 | **Value tour** | "Recipe saved!" → **View →** | Photo · **servings / prep / cook** ("planning a dinner, I know instantly") · **ingredients with amounts** ("she never said '1 tbsp'. The app estimated it, because a blank quantity is useless in a kitchen — that's a deliberate choice") · **numbered steps** ("phone propped on the counter, hands covered in flour") · **health notes** (skip if any is wrong) · **View original Reel** ("never loses the source"). |
 | 10–11 | **Cookbook** | ← Back → Recipes. Type one word in **Search**. | "Every reel I've saved, searchable." Then Home → paste the **same** URL → "Already saved" card. "It knows. Won't burn 30 seconds re-processing." |
@@ -87,14 +87,25 @@ unless asked.
 - **Who's it for?** Home cooks 22–40 who get food inspiration from short video and never cook it.
 - **How does it make money?** Free tier with a monthly save limit; subscription above that.
   *(Pick a number and say it with confidence.)*
-- **What if the AI gets a quantity wrong?** "It estimates and says so. Editing is next on the roadmap.
-  A close '1 tbsp' beats a blank."
+- **What if the AI gets a quantity wrong?** "When the creator doesn't say an amount, it estimates one,
+  because a blank is useless in a kitchen. Today it doesn't mark which amounts were estimated; flagging
+  those and letting you edit them are the next two things I'd build." *(Don't claim it already flags them.)*
 - **Why not just screenshot?** Repeat minute 3.
-- **Competition?** Recipe-saver apps need a written recipe URL. None start from a video.
-- **Cost per recipe?** Cents — one scrape, one transcription, one AI call.
+- **Competition?** Most recipe savers import from a written recipe web page. Check before Thursday which
+  apps already start from a video, and name one if you can. Don't say "none do" unless you've checked.
+- **Cost per recipe?** One scrape, one transcription, one AI call. Get the real number from your
+  Apify, Replicate and Anthropic usage pages tonight and quote it. Don't guess.
 - **What's under the hood?** "Three AI services orchestrated in one pipeline: it pulls the video,
   transcribes the speech, and a language model reconciles caption + transcript into a structured recipe."
 - **What if it fails?** "It tells you plainly and you try another reel." (You may have shown it.)
+- **Why a laptop, not a phone?** "So all of you can see it clearly on a video call. It's the same live
+  production app you'd install on your phone."
+- **Why doesn't it pop up in Instagram's share sheet?** "It's built to: the app registers as a share
+  target. Android supports that for installed web apps. iPhone doesn't let web apps into the share sheet
+  yet, so on iPhone it's Copy link, then paste. The fix there is a small native iOS wrapper; that's on the
+  roadmap." *(Only say it works on Android if you've tested it on an Android phone.)*
+- **Can I try it?** Only offer it if you've set it up: Google sign-in is in Testing mode, so only your
+  listed test users can log in. The email-link sign-in works for anyone.
 
 ---
 
