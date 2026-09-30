@@ -25,6 +25,14 @@ export interface RecipeExtractionInput {
 export async function extractRecipe(input: RecipeExtractionInput): Promise<Recipe> {
   logger.debug({ instagramUrl: input.instagramUrl }, 'Extracting recipe with Claude')
 
+  // With no caption and no speech there is nothing to extract — refuse rather than let the model invent one
+  const hasContent = [input.caption, input.apifyTranscript, input.whisperTranscript].some(
+    (s) => s.trim().length > 0
+  )
+  if (!hasContent) {
+    throw new Error('No recipe content found in this reel')
+  }
+
   const response = await anthropic.messages.create({
     model: 'claude-haiku-4-5',
     max_tokens: 2048,
@@ -47,6 +55,11 @@ export async function extractRecipe(input: RecipeExtractionInput): Promise<Recip
   if (!parsed.success) {
     logger.error({ issues: parsed.error.issues }, 'Claude output failed schema validation')
     throw new Error('Recipe extraction produced invalid data')
+  }
+
+  // The prompt forbids placeholders; if the model emits one anyway, the recipe is unusable
+  if (/<unknown>/i.test(parsed.data.title)) {
+    throw new Error('Recipe extraction could not identify a recipe')
   }
 
   logger.debug({ title: parsed.data.title }, 'Recipe extraction complete')

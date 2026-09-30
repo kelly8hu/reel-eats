@@ -84,6 +84,26 @@ describe('scrapeReel', () => {
     await expect(scrapeReel(VALID_URL)).rejects.toThrow('Apify returned no results')
   })
 
+  it('throws when Apify reports the post as not found / private', async () => {
+    vi.mocked(fetch).mockResolvedValueOnce({
+      ok: true,
+      json: vi.fn().mockResolvedValue([{ url: VALID_URL, error: 'not_found' }]),
+    } as unknown as Response)
+
+    await expect(scrapeReel(VALID_URL)).rejects.toThrow('Reel not found or not public')
+    expect(vi.mocked(fetch)).toHaveBeenCalledTimes(1) // no download attempted
+  })
+
+  it('does not fall back to the post URL when videoUrl is missing', async () => {
+    vi.mocked(fetch).mockResolvedValueOnce({
+      ok: true,
+      json: vi.fn().mockResolvedValue([{ url: VALID_URL, caption: 'text only' }]),
+    } as unknown as Response)
+
+    await expect(scrapeReel(VALID_URL)).rejects.toThrow('did not include a video URL')
+    expect(vi.mocked(fetch)).toHaveBeenCalledTimes(1)
+  })
+
   it('throws when the result has no video URL', async () => {
     vi.mocked(fetch).mockResolvedValueOnce({
       ok: true,

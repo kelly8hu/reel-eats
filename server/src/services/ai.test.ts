@@ -88,6 +88,33 @@ describe('extractRecipe', () => {
     expect(prompt).toContain(VALID_INPUT.whisperTranscript)
   })
 
+  it('refuses to call Claude when caption and both transcripts are empty', async () => {
+    const { extractRecipe } = await import('./ai.js')
+    await expect(
+      extractRecipe({ ...VALID_INPUT, caption: '', apifyTranscript: '  ', whisperTranscript: '' })
+    ).rejects.toThrow('No recipe content found')
+    expect(mockCreate).not.toHaveBeenCalled()
+  })
+
+  it('throws when Claude returns a placeholder title', async () => {
+    mockCreate.mockResolvedValue({
+      content: [
+        {
+          type: 'tool_use',
+          name: 'extract_recipe',
+          input: {
+            title: '<UNKNOWN>',
+            ingredients: [{ name: '<UNKNOWN>', quantity: '<UNKNOWN>' }],
+            steps: [{ step: 1, instruction: '<UNKNOWN>' }],
+          },
+        },
+      ],
+    })
+
+    const { extractRecipe } = await import('./ai.js')
+    await expect(extractRecipe(VALID_INPUT)).rejects.toThrow('could not identify a recipe')
+  })
+
   it('throws when Claude does not return a tool_use block', async () => {
     mockCreate.mockResolvedValue({
       content: [{ type: 'text', text: 'I cannot extract a recipe from this.' }],
