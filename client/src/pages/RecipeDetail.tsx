@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { getRecipe, deleteRecipe, type Recipe } from '../lib/api.js'
+import { moodTagsFor } from '../lib/moods.js'
 import BottomNav from '../components/BottomNav.js'
 
 export default function RecipeDetail() {
@@ -67,6 +68,7 @@ export default function RecipeDetail() {
 
   const prepTime = formatTime(recipe.prep_time_minutes)
   const cookTime = formatTime(recipe.cook_time_minutes)
+  const moodTags = moodTagsFor(recipe)
 
   return (
     <div className="page">
@@ -125,6 +127,18 @@ export default function RecipeDetail() {
             </div>
           </div>
         </div>
+
+        {/* Mood tags — which "How are you feeling?" picks surface this recipe */}
+        {moodTags.length > 0 && (
+          <div className="mood-tags">
+            <span className="mood-tags-label">Good for</span>
+            {moodTags.map((m) => (
+              <span key={m.id} className="mood-tag">
+                {m.emoji} {m.label}
+              </span>
+            ))}
+          </div>
+        )}
 
         {/* Health notes */}
         {recipe.health_notes && recipe.health_notes.length > 0 && (

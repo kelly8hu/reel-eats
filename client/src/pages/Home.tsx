@@ -1,9 +1,11 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth.js'
-import { submitRecipe, getJobStatus } from '../lib/api.js'
+import { submitRecipe, getJobStatus, getRecipes, type Recipe } from '../lib/api.js'
 import { supabase } from '../lib/supabase.js'
+import { MOODS, recommend, type MoodId } from '../lib/moods.js'
 import BottomNav from '../components/BottomNav.js'
+import RecipeCard from '../components/RecipeCard.js'
 
 type JobState =
   | { phase: 'idle' }
@@ -14,8 +16,6 @@ type JobState =
   | { phase: 'duplicate'; recipeId: string }
   | { phase: 'failed'; error: string }
 
-const MOODS = ['😴 Low energy', '🤢 Stomachache', '😰 Stressed', '💪 Post-workout', '🤒 Sick', '🧘 Balanced']
-
 export default function Home() {
   const { session, loading } = useAuth()
   const location = useLocation()
@@ -24,7 +24,23 @@ export default function Home() {
   const [job, setJob] = useState<JobState>({ phase: 'idle' })
   const [email, setEmail] = useState('')
   const [magicLinkSent, setMagicLinkSent] = useState(false)
-  const [selectedMood, setSelectedMood] = useState<string | null>(null)
+  const [selectedMoods, setSelectedMoods] = useState<MoodId[]>([])
+  const [recipes, setRecipes] = useState<Recipe[]>([])
+
+  // The cookbook backs the mood recommendations; refetch when a new recipe lands
+  const completedRecipeId = job.phase === 'completed' ? job.recipeId : null
+  useEffect(() => {
+    if (!session) return
+    getRecipes().then((res) => {
+      if (res.data) setRecipes(res.data)
+    })
+  }, [session, completedRecipeId])
+
+  function toggleMood(id: MoodId) {
+    setSelectedMoods((prev) => (prev.includes(id) ? prev.filter((m) => m !== id) : [...prev, id]))
+  }
+
+  const recommendations = recommend(recipes, selectedMoods)
 
   const handleSubmit = useCallback(async (urlToSubmit: string, fromShare = false) => {
     if (!urlToSubmit.trim()) return
@@ -246,23 +262,40 @@ export default function Home() {
           📖 View my recipes
         </button>
 
-        {/* Mood selector */}
+        {/* Mood selector → recommendations from the user's own cookbook */}
         <div className="stack stack-sm">
           <p className="section-label">How are you feeling?</p>
           <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 4 }}>
-            Soon we'll recommend recipes based on how you feel.
+            Pick one or more and we'll suggest something from your cookbook.
           </p>
           <div className="mood-pills">
             {MOODS.map((mood) => (
               <button
-                key={mood}
-                className={`mood-pill${selectedMood === mood ? ' selected' : ''}`}
-                onClick={() => setSelectedMood(selectedMood === mood ? null : mood)}
+                key={mood.id}
+                className={`mood-pill${selectedMoods.includes(mood.id) ? ' selected' : ''}`}
+                onClick={() => toggleMood(mood.id)}
               >
-                {mood}
+                {mood.emoji} {mood.label}
               </button>
             ))}
           </div>
+
+          {selectedMoods.length > 0 && (
+            <div className="stack stack-sm" style={{ marginTop: 12 }}>
+              <p style={{ fontSize: 14, fontWeight: 700 }}>Recommended for you</p>
+              {recommendations.length === 0 ? (
+                <div className="card" style={{ padding: '14px 16px', fontSize: 13, color: 'var(--text-muted)' }}>
+                  Nothing in your cookbook fits this yet — save a few more reels and check back.
+                </div>
+              ) : (
+                <div className="recipe-grid">
+                  {recommendations.map(({ recipe, reasons }) => (
+                    <RecipeCard key={recipe.id} recipe={recipe} reason={reasons.join(' · ')} />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
