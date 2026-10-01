@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { getRecipe, deleteRecipe, type Recipe } from '../lib/api.js'
 import { moodTagsFor } from '../lib/moods.js'
 import BottomNav from '../components/BottomNav.js'
+import PhotoViewer from '../components/PhotoViewer.js'
 
 export default function RecipeDetail() {
   const { id } = useParams<{ id: string }>()
@@ -12,6 +13,7 @@ export default function RecipeDetail() {
   const [thumbError, setThumbError] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [photoOpen, setPhotoOpen] = useState(false)
 
   async function handleDelete() {
     if (!id) return
@@ -74,14 +76,33 @@ export default function RecipeDetail() {
     <div className="page">
       {/* Hero image */}
       {recipe.thumbnail_url && !thumbError ? (
-        <img
-          src={recipe.thumbnail_url}
-          alt={recipe.title}
-          className="recipe-hero"
-          onError={() => setThumbError(true)}
-        />
+        <div className="recipe-hero-wrap">
+          <img
+            src={recipe.thumbnail_url}
+            alt={recipe.title}
+            className="recipe-hero"
+            onClick={() => setPhotoOpen(true)}
+            onError={() => setThumbError(true)}
+          />
+          <button
+            className="recipe-hero-expand"
+            aria-label="View full photo"
+            onClick={() => setPhotoOpen(true)}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <polyline points="15 3 21 3 21 9" />
+              <polyline points="9 21 3 21 3 15" />
+              <line x1="21" y1="3" x2="14" y2="10" />
+              <line x1="3" y1="21" x2="10" y2="14" />
+            </svg>
+          </button>
+        </div>
       ) : (
         <div className="recipe-hero-placeholder">🍽️</div>
+      )}
+
+      {photoOpen && recipe.thumbnail_url && (
+        <PhotoViewer src={recipe.thumbnail_url} alt={recipe.title} onClose={() => setPhotoOpen(false)} />
       )}
 
       {/* Back button */}
