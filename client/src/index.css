@@ -377,6 +377,66 @@ body {
   background: var(--border);
 }
 
+/* Wrapper so the expand button can sit on top of the hero photo */
+.recipe-hero-wrap {
+  position: relative;
+}
+
+.recipe-hero-wrap .recipe-hero {
+  display: block;
+  cursor: zoom-in;
+}
+
+.recipe-hero-expand {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+}
+
+/* Full-screen cover photo */
+.photo-viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 200; /* above the bottom nav */
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: zoom-out;
+}
+
+.photo-viewer-img {
+  max-width: min(100%, 480px);
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.photo-viewer-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  font-size: 26px;
+  line-height: 1;
+  cursor: pointer;
+}
+
 .recipe-hero-placeholder {
   width: 100%;
   aspect-ratio: 16/9;
